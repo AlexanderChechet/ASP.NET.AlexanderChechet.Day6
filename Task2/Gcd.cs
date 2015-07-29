@@ -1,101 +1,126 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace Task2
 {
     public static class Gcd
     {
+        public delegate int GcdDelegate(out long time, int a, int b);
+
         #region Public Euclid methods
         public static int EuclidGcd(int a, int b)
         {
-            return GetEuclidGcd(a, b);
+            return GetGcd(a, b, Euclid);
         }
 
         public static int EuclidGcd(int a, int b, int c)
         {
-            return GetEuclidGcd(GetEuclidGcd(a, b), c);
+            return GetGcd(a, b, c, Euclid);
         }
 
         public static int EuclidGcd(params int[] args)
         {
-            int result = args[0];
-            for (int i = 1; i < args.Length; i++)
-                result = EuclidGcd(result, args[i]);
-            return result;
+            return GetGcd(args, Euclid);
         }
 
         public static int EuclidGcd(out long time, int a, int b)
         {
-            return GetEuclidGcd(out time, a, b);
+            return GetGcd(out time, a, b, Euclid);
         }
 
         public static int EuclidGcd(int a, int b, int c, out long time)
         {
-            return GetEuclidGcd(out time, GetEuclidGcd(out time, a, b), c);
+            return GetGcd(out time, a, b, c, Euclid);
         }
 
         public static int EuclidGcd(out long time, params int[] args)
         {
-            var stopWatch = Stopwatch.StartNew();
-            int result = args[0];
-            for (int i = 1; i < args.Length; i++)
-                result = EuclidGcd(out time, result, args[i]);
-            stopWatch.Stop();
-            time = stopWatch.ElapsedTicks;
-            return result;
+            return GetGcd(out time, args, Euclid);
         }
         #endregion
 
         #region Public Stein methods
         public static int SteinGcd(int a, int b)
         {
-            return GetSteinGcd(a, b);
+            return GetGcd(a, b, Stein);
         }
 
         public static int SteinGcd(int a, int b, int c)
         {
-            return GetSteinGcd(GetSteinGcd(a, b), c);
+            return GetGcd(a, b, c, Stein);
         }
 
         public static int SteinGcd(params int[] args)
         {
-            int result = args[0];
-            for (int i = 1; i < args.Length; i++)
-                result = SteinGcd(result, args[i]);
-            return result;
+            return GetGcd(args, Stein);
         }
 
         public static int SteinGcd(out long time, int a, int b)
         {
-            return GetSteinGcd(out time, a, b);
+            return GetGcd(out time, a, b, Stein);
         }
 
         public static int SteinGcd(out long time, int a, int b, int c)
         {
-            return GetSteinGcd(out time, GetSteinGcd(out time, a, b), c);
+            return GetGcd(out time, a, b, c, Stein);
         }
 
         public static int SteinGcd(out long time, params int[] args)
         {
-            var stopWatch = Stopwatch.StartNew();
-            int result = args[0];
-            for (int i = 1; i < args.Length; i++)
-                result = SteinGcd(out time, result, args[i]);
-            stopWatch.Stop();
-            time = stopWatch.ElapsedTicks;
-            return result;
+            return GetGcd(out time, args, Stein);
         }
         #endregion
 
         #region Private methods
-        private static int GetEuclidGcd(out long time, int a, int b)
+
+        private static int GetGcd(int a, int b, Func<int, int, int> gcdFunc)
+        {
+            return gcdFunc(a, b);
+        }
+
+        private static int GetGcd(int a, int b, int c, Func<int, int, int> gcdFunc)
+        {
+            return gcdFunc(gcdFunc(a, b), c);
+        }
+
+        private static int GetGcd(int[] array, Func<int, int, int> gcdFunc)
+        {
+            int result = array[0];
+            for (int i = 1; i < array.Length; i++)
+                result = gcdFunc(result, array[i]);
+            return result;
+        }
+
+        private static int GetGcd(out long time, int a, int b, GcdDelegate gcdFunc)
+        {
+            return gcdFunc(out time, a, b);
+        }
+
+        private static int GetGcd(out long time, int a, int b, int c, GcdDelegate gcdFunc)
+        {
+            return gcdFunc(out time, gcdFunc(out time, a, b), c);
+        }
+
+        private static int GetGcd(out long time, int[] array, GcdDelegate gcdFunc)
         {
             var stopWatch = Stopwatch.StartNew();
-            int result = GetEuclidGcd(a, b);
+            int result = array[0];
+            for (int i = 1; i < array.Length; i++)
+                result = gcdFunc(out time, result, array[i]);
+            stopWatch.Stop();
             time = stopWatch.ElapsedTicks;
             return result;
         }
 
-        private static int GetEuclidGcd(int a, int b)
+        private static int Euclid(out long time, int a, int b)
+        {
+            var stopWatch = Stopwatch.StartNew();
+            int result = Euclid(a, b);
+            time = stopWatch.ElapsedTicks;
+            return result;
+        }
+
+        private static int Euclid(int a, int b)
         {
             while (b != 0)
             {
@@ -106,16 +131,16 @@ namespace Task2
             return a;
         }
 
-        private static int GetSteinGcd(out long time, int a, int b)
+        private static int Stein(out long time, int a, int b)
         {
             var stopWatch = Stopwatch.StartNew();
-            int result = GetSteinGcd(a, b);
+            int result = Stein(a, b);
             stopWatch.Stop();
             time = stopWatch.ElapsedTicks;
             return result;
         }
 
-        private static int GetSteinGcd(int a, int b)
+        private static int Stein(int a, int b)
         {
             int shift;
 
